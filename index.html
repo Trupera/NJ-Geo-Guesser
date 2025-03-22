@@ -5,18 +5,24 @@
   <title>The New Jersey Geo Guesser</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="geo.css"  rel="stylesheet" type="text/css"/>
-  
 </head>
 <body>
     <div class="background-layer"></div>
 
   <h1>The World Guesser</h1>
   <p>The New Jerseyean Gods Shall Determine Your Image's Location.</p>
+  
+  <!-- Add an input for the API key -->
+  <div>
+    <label for="apiKeyInput">Enter your API Key:</label>
+    <input type="text" id="apiKeyInput" placeholder="Enter API Key">
+  </div>
+
   <input type="file" id="imageInput" accept="image/*">
   <div id="image-preview"></div>
   <button onclick="analyzeImage()">BEHOLD!</button>
 
-  <div id="results" ></div>
+  <div id="results"></div>
 
   <script src="analyzing.js"></script>
   
