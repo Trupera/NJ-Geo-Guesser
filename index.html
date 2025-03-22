@@ -5,10 +5,10 @@
   <title>Jersey Geoguesser</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="geo.css" rel="stylesheet" type="text/css"/>
+  <script type="module" src="example.mjs" defer></script>
 </head>
 <body>
-    <div class="background-layer"></div>
-
+  <div class="background-layer"></div>
   <h1>In New Jersey?</h1>
   <p>Upload a photo and we'll try to guess where in NJ it is.</p>
   <input type="file" id="imageInput" accept="image/*">
@@ -17,70 +17,6 @@
 
   <div id="results"></div>
 
-  <script>
-    const imageInput = document.getElementById('imageInput');
-    const preview = document.getElementById('image-preview');
-    const results = document.getElementById('results');
-
-    imageInput.addEventListener('change', () => {
-      const file = imageInput.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          preview.innerHTML = `<img src="${e.target.result}" width="300">`;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    function analyzeImage() {
-  const file = imageInput.files[0];
-  if (!file) {
-    results.innerHTML = "Try me!";
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('image', file);  // This key name may need to match what they expect
-
-  results.innerHTML = "Analyzing image...";
-
-  fetch('http://localhost:5000/predict', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    const location = data.location || "unknown place";
-    const confidence = data.confidence ? Math.round(data.confidence * 100) : "??";
-    results.innerHTML = `I'm guessing this is <strong>${location}</strong> (${confidence}% confident).`;
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    results.innerHTML = "Couldn't reach the AI model. Check the backend.";
-  });
-}
-function getRandomLocation() {
-  document.getElementById('suggestion').innerHTML = 'Loading location...';
-
-  fetch('http://localhost:5000/random-location')  // This is the new backend route you'll need
-    .then(response => response.json())
-    .then(data => {
-      const location = data.location;
-      const imageUrl = data.image_url;
-
-      document.getElementById('suggestion').innerHTML = `
-        <strong>Go explore:</strong> ${location}<br>
-        <img src="${imageUrl}" width="150" style="margin-top: 5px;">
-      `;
-    })
-    .catch(error => {
-      document.getElementById('suggestion').innerHTML = 'Could not load a location.';
-      console.error(error);
-    });
-}
-
-  </script>
   <button id="boredButton" style="position: fixed; bottom : 20px; left: 20px;" onclick="getRandomLocation()">
     Bored?
   </button>
