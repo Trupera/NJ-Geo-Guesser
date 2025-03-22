@@ -4,11 +4,80 @@
   <meta charset="UTF-8">
   <title>Jersey Geoguesser</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="geo.css" rel="stylesheet" type="text/css"/>
-  <script type="module" src="example.mjs" defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #image-preview {
+      max-width: 80%;
+      margin: 20px auto;
+    }
+
+    input[type="file"] {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 5px 5px;
+      margin-top: 10px;
+      font-size: 50px;
+      cursor: pointer;
+    }
+
+    #results {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .background-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('NJFLAG.JPG');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+  z-index: -1;
+}
+  .background-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    opacity: 0.3;
+    z-index: -1;
+    transition: background-image 1s ease-in-out;
+  }
+</style>
+
+  </style>
 </head>
 <body>
-  <div class="background-layer"></div>
+    <div class="background-layer" id="slideshow-bg"></div>
+
+<button onclick="startSlideshow()" style="position: fixed; top: 20px; left: 20px; z-index: 10;">
+  Play Slideshow
+</button>
+
+<button onclick="stopSlideshow()" style="position: fixed; top: 100px; left: 20px; z-index: 10;">
+  Stop Slideshow
+</button> 
+
+    <div class="background-layer"></div>
+
   <h1>In New Jersey?</h1>
   <p>Upload a photo and we'll try to guess where in NJ it is.</p>
   <input type="file" id="imageInput" accept="image/*">
@@ -17,11 +86,106 @@
 
   <div id="results"></div>
 
-  <button id="boredButton" style="position: fixed; bottom : 20px; left: 20px;" onclick="getRandomLocation()">
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('image-preview');
+    const results = document.getElementById('results');
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.innerHTML = `<img src="${e.target.result}" width="300">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function analyzeImage() {
+  const file = imageInput.files[0];
+  if (!file) {
+    results.innerHTML = "Try me!";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('image', file);  // This key name may need to match what they expect
+
+  results.innerHTML = "Analyzing image...";
+
+  fetch('http://localhost:5000/predict', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    const location = data.location || "unknown place";
+    const confidence = data.confidence ? Math.round(data.confidence * 100) : "??";
+    results.innerHTML = `I'm guessing this is <strong>${location}</strong> (${confidence}% confident).`;
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    results.innerHTML = "Couldn't reach the AI model. Check the backend.";
+  });
+}
+function getRandomLocation() {
+  document.getElementById('suggestion').innerHTML = 'Loading location...';
+
+  fetch('http://localhost:5000/random-location')  // This is the new backend route you'll need
+    .then(response => response.json())
+    .then(data => {
+      const location = data.location;
+      const imageUrl = data.image_url;
+
+      document.getElementById('suggestion').innerHTML = `
+        <strong>Go explore:</strong> ${location}<br>
+        <img src="${imageUrl}" width="150" style="margin-top: 5px;">
+      `;
+    })
+    .catch(error => {
+      document.getElementById('suggestion').innerHTML = 'Could not load a location.';
+      console.error(error);
+    });
+}
+
+  </script>
+  <button id="boredButton" style="position: fixed; bottom: 20px; left: 20px;" onclick="getRandomLocation()">
     Bored?
   </button>
   
   <div id="suggestion" style="position: fixed; bottom: 100px; left: 25px; max-width: 200px;"></div>
+  
+  <script>
+    const backgrounds = [
+      'ELIZABETH.jpg',
+      'Trenton.jpg',
+      'Delaware Bridge.jpg',
+      'GreenLaneBuilding.jpg',
+      'NJIT.jpg'
+    ];
+  
+    let currentBg = 0;
+    let slideshowInterval = null;
+  
+    function startSlideshow() {
+      if (slideshowInterval !== null) return; // already running
+  
+      changeBackground(); // show the first one immediately
+      slideshowInterval = setInterval(changeBackground, 5000); // change every 5 sec
+    }
+  
+    function stopSlideshow() {
+      clearInterval(slideshowInterval);
+      slideshowInterval = null;
+    }
+  
+    function changeBackground() {
+      const bgDiv = document.getElementById('slideshow-bg');
+      bgDiv.style.backgroundImage = `url('${backgrounds[currentBg]}')`;
+      currentBg = (currentBg + 1) % backgrounds.length;
+    }
+  </script>
   
 </body>
 </html>
