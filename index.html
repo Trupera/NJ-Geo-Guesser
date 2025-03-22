@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jersey Geoguesser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #image-preview {
+      max-width: 80%;
+      margin: 20px auto;
+    }
+
+    input[type="file"] {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 5px 5px;
+      margin-top: 10px;
+      font-size: 50px;
+      cursor: pointer;
+    }
+
+    #results {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .background-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('NJSEAL.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 60%;
+  opacity: 0.08;
+  z-index: -1;
+}
+
+  </style>
+</head>
+<body>
+    <div class="background-layer"></div>
+
+  <h1>In New Jersey?</h1>
+  <p>Upload a photo and we'll try to guess where in NJ it is.</p>
+  <input type="file" id="imageInput" accept="image/*">
+  <div id="image-preview"></div>
+  <button onclick="analyzeImage()">Try me!</button>
+
+  <div id="results"></div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('image-preview');
+    const results = document.getElementById('results');
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.innerHTML = `<img src="${e.target.result}" width="300">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function analyzeImage() {
+      // This is where you’d send the image to your backend model
+      results.innerHTML = 'Analyzing image... (this will connect to your model)';
+    }
+  </script>
+</body>
+</html>
