@@ -30,7 +30,7 @@ async function analyzeImage() {
     results.innerHTML = "Analyzing image...";
 
     try {
-        const apiKey = "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";
+        const apiKey = "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";
 
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
